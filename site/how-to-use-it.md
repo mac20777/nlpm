@@ -5,12 +5,11 @@ outline: [2, 3]
 
 # How to use it
 
-NLPM ships in two shapes. The **plugin** runs inside Claude Code and
-gives you eleven slash commands backed by six specialist agents and a
-catalog of reference skills. The **standalone binaries** (pure-Python,
-stdlib-only, no `pip install`) cover the deterministic subset for
-environments without Claude Code — Codex CLI projects, Antigravity
-projects, pre-commit hooks, CI runners, release scripts.
+NLPM ships in three shapes. The **Claude Code plugin** provides twelve slash
+commands backed by specialist agents. The **Codex plugin** provides the same
+twelve user goals as workflow skills, plus the shared reference catalog. The
+**standalone binaries** (pure Python, stdlib-only, no `pip install`) cover the
+deterministic subset for pre-commit hooks, CI runners, and release scripts.
 
 The scoring rubric covers **all three tools NLPM supports** (Claude Code,
 Codex CLI, Antigravity) via tier-aware overlays — `nlpm:conventions`
@@ -56,6 +55,16 @@ If you see "Plugin not found in marketplace 'xiaolai'", run
 `claude plugin marketplace update xiaolai` and retry — `plugin install`
 does not auto-refresh. The community marketplace doesn't have this caveat.
 
+### As a Codex plugin
+
+```bash
+codex plugin marketplace add xiaolai/nlpm --ref main
+codex plugin add nlpm@xiaolai
+```
+
+Use `$nlpm-ls`, `$nlpm-score`, `$nlpm-check`, and the other `$nlpm-*`
+workflows. Review the plugin-bundled hook with `/hooks` before trusting it.
+
 ### As a standalone binary
 
 The standalone `nlpm-check` is a single Python 3.11+ file with no
@@ -78,12 +87,12 @@ chmod +x bin/nlpm-check
 Verify with `nlpm-check --version`. For the README badge, also fetch
 `nlpm-badge` from the same `bin/` path.
 
-## The eleven slash commands
+## The twelve workflows
 
-Every command is a markdown file under `commands/`. The frontmatter
-declares the tools it may call; the body is the workflow. Read any of
-them to see exactly what the command does — there is no compiled
-runtime in between.
+Claude commands are Markdown files under `commands/`; Codex workflow sources
+are under `codex/skills/` and are assembled into the installable
+`plugins/nlpm/` package. Their bodies expose the workflow directly and share
+the same bundled scoring and convention references.
 
 ```mermaid
 flowchart TD

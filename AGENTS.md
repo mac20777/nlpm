@@ -350,6 +350,7 @@ This keeps Claude Code, Codex CLI, and Gemini CLI on the same context.
 ## Project Structure
 
 - `commands/`, `agents/`, `skills/nlpm/`, `hooks/` — the plugin artifacts, at repo root (auto-discovered by Claude Code)
+- `codex/` — Codex workflow and reference sources; `plugins/nlpm/` is the self-contained installable package rebuilt by `scripts/build-codex-package.sh`
 - `.claude/` — gitignored except `.claude/nlpm.local.md` (project NLPM config)
 - `.codex/prompts/` — Codex slash-command prompts
 - `.codex/hooks.json` / `.codex/config.toml` — Codex hooks/config (optional)

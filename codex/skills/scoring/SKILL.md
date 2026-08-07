@@ -1,7 +1,6 @@
 ---
 name: scoring
 description: Use when scoring NL artifact quality, applying penalties, or calibrating lint judgment — contains the 100-point rubric with penalty tables per artifact type. Four worked calibration examples (Excellent Agent / Rewrite Agent / Excellent Rule / Weak Rule) live in `references/calibration-examples.md`, loaded on demand when anchoring borderline cases.
-version: 0.3.1
 ---
 
 # NLPM Quality Scoring Rubric
@@ -370,7 +369,12 @@ Type-specific penalty rows are deferred until N ≥ 3 examples surface — the e
 
 ### All Artifact Types: Vocabulary Drift (R51 — opt-in, disabled by default)
 
-Applied only when `R51: { enabled: true, vocabulary_skill: <path> }` appears in `.claude/nlpm.local.md`. Without the opt-in, R51 contributes zero penalty regardless of artifact content. The configured `vocabulary_skill` must contain a `registry.yaml` listing canonical and deprecated terms; without it, R51 emits an advisory and contributes zero penalty.
+Applied only when `R51: { enabled: true, vocabulary_skill: <path> }` appears in
+the effective NLPM config (`.nlpm/config.md` in Codex, with legacy
+`.claude/nlpm.local.md` fallback). Without the opt-in, R51 contributes zero
+penalty regardless of artifact content. The configured `vocabulary_skill` must
+contain a `registry.yaml` listing canonical and deprecated terms; without it,
+R51 emits an advisory and contributes zero penalty.
 
 | Rule | Check | Condition | Penalty |
 |------|-------|-----------|---------|
@@ -417,7 +421,8 @@ Applied when linting an entire plugin rather than individual files.
 | 60–69 | Weak | Below threshold; significant issues |
 | <60 | Rewrite | Fundamental problems; recommend rewriting from scratch |
 
-**Default pass threshold:** 70. Configurable in `.claude/nlpm.local.md`.
+**Default pass threshold:** 70. Configurable in `.nlpm/config.md` in Codex;
+legacy `.claude/nlpm.local.md` remains a compatibility fallback.
 
 ---
 

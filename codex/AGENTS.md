@@ -1,37 +1,51 @@
-# nlpm — reference knowledge for Codex CLI
+# nlpm — full Codex workflow plugin
 
-This Codex plugin ships nlpm's **reference-knowledge skills**: the 50 Rules of Natural Language Programming, the 100-point scoring rubric, per-tool conventions (Claude Code / Codex CLI / Antigravity), anti-patterns, the vocabulary discipline framework, and authoring guides for skills, agents, hooks, rules, plugins, and prompts.
+This tree is the source for NLPM's focused Codex workflow skills and shared
+reference knowledge. The installable, self-contained plugin is assembled at
+`plugins/nlpm/` by `scripts/build-codex-package.sh`. The Claude Code slash
+commands remain under `commands/`; their Codex counterparts live here and
+follow the same scoring rules.
 
-These skills are knowledge, not commands. Load one when you need it — e.g. ask Codex to "score this skill against the nlpm rules" and it pulls in `$nlpm-rules` and `$nlpm-scoring`; ask "what's the Codex skill layout" and it pulls `$nlpm-conventions-codex`.
+## Workflow skills
 
-## What this plugin does NOT include
+| Skill | Goal |
+|-------|------|
+| `$nlpm-init` | Configure NLPM and capture a baseline |
+| `$nlpm-ls` | Inventory NL artifacts across supported tools |
+| `$nlpm-score` | Apply the 100-point rubric |
+| `$nlpm-check` | Validate structure and cross-artifact consistency |
+| `$nlpm-fix` | Apply safe mechanical fixes and re-score |
+| `$nlpm-trend` | Compare matching historical snapshots |
+| `$nlpm-test` | Run `.nlpm-test` NL-TDD specs |
+| `$nlpm-security-scan` | Review executable plugin surfaces without running them |
+| `$nlpm-report` | Render a self-contained local HTML report |
+| `$nlpm-vocab-init` | Seed an evidence-based vocabulary registry |
+| `$nlpm-vocab-drift` | Find advisory terminology drift |
+| `$nlpm-spec-sync` | Refresh convention overlays from first-party specs |
 
-nlpm's interactive linting commands (`/nlpm:score`, `/nlpm:check`, `/nlpm:fix`, etc.) are **not** ported to Codex. Those commands orchestrate sub-agents via Claude Code's `Task()` dispatch, which has no in-skill equivalent in Codex. They remain a Claude Code plugin.
+Workflow skills share `codex/references/workflows.md`. Keep tool-neutral state
+under `.nlpm/`; read legacy `.claude/nlpm*.json` or `.md` files only as a
+compatibility fallback.
 
-For deterministic checks without Claude Code (manifest-vs-disk consistency, frontmatter validity, hook event-name case) on **any** tool's artifacts, use the standalone Python validator:
+## Reference skills
 
-```bash
-curl -fsSL -o /usr/local/bin/nlpm-check \
-  https://raw.githubusercontent.com/xiaolai/nlpm/main/bin/nlpm-check
-chmod +x /usr/local/bin/nlpm-check
-nlpm-check .
-```
+The existing rules, scoring, conventions, security, testing, vocabulary,
+patterns, orchestration, and writing skills remain loadable independently.
+Workflow skills should reference them rather than duplicating penalty tables or
+platform schemas.
 
-## Skills in this collection
+## Development rules
 
-| Skill | What it teaches |
-|-------|-----------------|
-| `$nlpm-rules` | The 50 Rules of Natural Language Programming (R01–R51) |
-| `$nlpm-scoring` | 100-point penalty rubric per artifact type |
-| `$nlpm-conventions` | Universal floor: SKILL.md open spec, AGENTS.md, naming |
-| `$nlpm-conventions-claude` | Claude Code overlay: `.claude/` paths, plugin.json, hook events |
-| `$nlpm-conventions-codex` | Codex CLI overlay: `.codex/config.toml`, `.codex-plugin/`, `.agents/skills/` |
-| `$nlpm-conventions-antigravity` | Antigravity + Gemini CLI overlay |
-| `$nlpm-patterns` | NL programming patterns + anti-patterns |
-| `$nlpm-vocabulary` | Controlled-vocabulary discipline (R51) |
-| `$nlpm-testing` | NL-TDD spec format |
-| `$nlpm-security` | Security pattern database for executable artifacts |
-| `$nlpm-orchestration` | Multi-agent workflow patterns (Claude-lineage; informational on Codex) |
-| `$nlpm-writing-skills` … `$nlpm-writing-prompts` | Authoring guides per artifact type |
+- Keep every skill focused on one user goal with `name` and trigger-oriented
+  `description` frontmatter only.
+- Resolve supporting resources relative to the active `SKILL.md`.
+- Use Codex subagents only for bounded read-only batches; keep aggregation,
+  edits, and verification in the main thread.
+- Preserve Claude Code compatibility. Do not change the Claude command contract
+  merely to simplify a Codex workflow.
+- Rebuild `plugins/nlpm/` after changing a Codex skill, shared reference,
+  bundled runtime, hook, or report template.
+- Run `python3 -m unittest tests.test_nlpm_check` and validate every changed
+  skill before handing off changes.
 
-Source and full Claude Code plugin: <https://github.com/xiaolai/nlpm>
+Source and issue tracker: <https://github.com/xiaolai/nlpm>

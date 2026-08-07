@@ -1,0 +1,17 @@
+{
+  "description": "Advise when an NL artifact is written or edited; suggest /nlpm:score in Claude Code or $nlpm-score in Codex. Fail-open per R31.",
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"${PLUGIN_ROOT:-${CLAUDE_PLUGIN_ROOT}}/scripts/check-artifact.sh\"",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
+}

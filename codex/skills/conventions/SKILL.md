@@ -1,7 +1,6 @@
 ---
 name: conventions
 description: "Universal NL programming conventions — SKILL.md open spec (agentskills.io), AGENTS.md as canonical universal memory file, vague-quantifier list, prompt engineering layers, naming conventions, the override system. Tool-specific schemas live in nlpm:conventions-claude / nlpm:conventions-codex / nlpm:conventions-antigravity."
-version: 0.2.1
 ---
 
 # Universal NL Programming Conventions
@@ -164,7 +163,7 @@ The override system is universal. The configuration file path is per-tool:
 | Tool | Config path |
 |---|---|
 | Claude Code | `.claude/nlpm.local.md` |
-| Codex CLI | `.codex/nlpm.local.md` |
+| Codex | `.nlpm/config.md` (NLPM workflow default; legacy `.claude/nlpm.local.md` is a read-only fallback) |
 | Antigravity | `.gemini/nlpm.local.md` (or `.agent/nlpm.local.md` — TBD post-2026-06-18) |
 
 Frontmatter format (identical across tools):

@@ -1,7 +1,6 @@
 ---
 name: testing
 description: "Use when writing test specs for NL artifacts, running /nlpm:test, or setting up TDD workflows for skills, agents, commands, rules, hooks, and prompts."
-version: 0.1.0
 ---
 
 ## The NL-TDD Cycle

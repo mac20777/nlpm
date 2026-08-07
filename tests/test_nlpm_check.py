@@ -46,6 +46,19 @@ def make_plugin(root: Path, manifest: dict | None, files: dict[str, str]) -> Non
         full.write_text(content, encoding="utf-8")
 
 
+def make_codex_plugin(root: Path, manifest: dict | None, files: dict[str, str]) -> None:
+    """Write a Codex manifest + file tree under root."""
+    if manifest is not None:
+        (root / ".codex-plugin").mkdir(parents=True, exist_ok=True)
+        (root / ".codex-plugin" / "plugin.json").write_text(
+            json.dumps(manifest), encoding="utf-8"
+        )
+    for rel, content in files.items():
+        full = root / rel
+        full.parent.mkdir(parents=True, exist_ok=True)
+        full.write_text(content, encoding="utf-8")
+
+
 SKILL_VALID = """---
 name: {name}
 description: a skill
@@ -87,10 +100,96 @@ class TestNlpmCheck(unittest.TestCase):
         self.assertIn("clean", out)
 
     def test_no_manifest_returns_2(self) -> None:
-        # Empty directory; no .claude-plugin/plugin.json.
+        # Empty directory; no Claude or Codex plugin manifest.
         code, _out, err = self.run_check()
         self.assertEqual(code, 2)
         self.assertIn("no .claude-plugin", err)
+
+    # ----- Codex plugins -----
+
+    def test_clean_codex_only_plugin_passes(self) -> None:
+        make_codex_plugin(self.tmp, {
+            "name": "ok",
+            "version": "1.0.0",
+            "description": "ok",
+            "skills": "./codex/skills/",
+        }, {
+            "codex/skills/ok/SKILL.md": SKILL_VALID.format(name="ok"),
+        })
+        code, out, err = self.run_check()
+        self.assertEqual(code, 0, f"out={out} err={err}")
+        self.assertIn("clean", out)
+
+    def test_codex_manifest_path_requires_dot_slash(self) -> None:
+        make_codex_plugin(self.tmp, {
+            "name": "p",
+            "version": "1.0.0",
+            "description": "p",
+            "skills": "codex/skills/",
+        }, {
+            "codex/skills/ok/SKILL.md": SKILL_VALID.format(name="ok"),
+        })
+        code, out, _ = self.run_check()
+        self.assertEqual(code, 1)
+        self.assertIn("must start with `./`", out)
+
+    def test_codex_manifest_missing_declared_path(self) -> None:
+        make_codex_plugin(self.tmp, {
+            "name": "p",
+            "version": "1.0.0",
+            "description": "p",
+            "skills": "./skills/ghost",
+        }, {})
+        code, out, _ = self.run_check()
+        self.assertEqual(code, 1)
+        self.assertIn("Codex plugin.json", out)
+        self.assertIn("doesn't exist on disk", out)
+
+    def test_codex_unregistered_skill_with_explicit_array(self) -> None:
+        make_codex_plugin(self.tmp, {
+            "name": "p",
+            "version": "1.0.0",
+            "description": "p",
+            "skills": ["./codex/skills/registered"],
+        }, {
+            "codex/skills/registered/SKILL.md": SKILL_VALID.format(
+                name="registered"
+            ),
+            "codex/skills/missed/SKILL.md": SKILL_VALID.format(name="missed"),
+        })
+        code, out, _ = self.run_check()
+        self.assertEqual(code, 1)
+        self.assertIn("codex/skills/missed/SKILL.md", out)
+        self.assertIn("not registered", out)
+
+    def test_codex_missing_identity_field(self) -> None:
+        make_codex_plugin(self.tmp, {
+            "name": "p",
+            "description": "p",
+            "skills": "./codex/skills/",
+        }, {
+            "codex/skills/ok/SKILL.md": SKILL_VALID.format(name="ok"),
+        })
+        code, out, _ = self.run_check()
+        self.assertEqual(code, 1)
+        self.assertIn("missing required `version`", out)
+
+    def test_dual_plugin_validates_codex_skills(self) -> None:
+        make_plugin(self.tmp, {"name": "p"}, {})
+        make_codex_plugin(self.tmp, {
+            "name": "p",
+            "version": "1.0.0",
+            "description": "p",
+            "skills": "./codex/skills/",
+        }, {
+            "codex/skills/bad/SKILL.md": (
+                "---\ndescription: missing name\n---\nbody\n"
+            ),
+        })
+        code, out, _ = self.run_check()
+        self.assertEqual(code, 1)
+        self.assertIn("codex/skills/bad/SKILL.md", out)
+        self.assertIn("missing required `name`", out)
 
     # ----- manifest-disk-diff (the bug class) -----
 

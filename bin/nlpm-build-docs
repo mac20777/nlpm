@@ -32,6 +32,11 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 TEMPLATE_DIR = ROOT / "templates" / "report"
+SKILLS_ROOT = (
+    ROOT / "skills" / "nlpm"
+    if (ROOT / "skills" / "nlpm").is_dir()
+    else ROOT / "skills"
+)
 
 
 # ---------------------------------------------------------------------------
@@ -451,11 +456,11 @@ def build(out_dir: Path) -> Path:
 
     # Asset reuse — link to ../assets and ../vendor when nested under a
     # report dir; otherwise expect ./assets next to docs/index.html.
-    rules_md = read_text(ROOT / "skills" / "nlpm" / "rules" / "SKILL.md")
+    rules_md = read_text(SKILLS_ROOT / "rules" / "SKILL.md")
     principles_md = read_text(ROOT / "analysis" / "vocabulary-design-principles.md")
-    vocab_md = read_text(ROOT / "skills" / "nlpm" / "vocabulary" / "SKILL.md")
-    scoring_md = read_text(ROOT / "skills" / "nlpm" / "scoring" / "SKILL.md")
-    conventions_md = read_text(ROOT / "skills" / "nlpm" / "conventions" / "SKILL.md")
+    vocab_md = read_text(SKILLS_ROOT / "vocabulary" / "SKILL.md")
+    scoring_md = read_text(SKILLS_ROOT / "scoring" / "SKILL.md")
+    conventions_md = read_text(SKILLS_ROOT / "conventions" / "SKILL.md")
     scanner_md = read_text(ROOT / "agents" / "vocab-drift-scanner.md")
 
     rules_html = emit_rules(rules_md)

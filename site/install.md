@@ -5,11 +5,15 @@ outline: [2, 3]
 
 # How to install
 
-NLPM has two install surfaces — pick whichever fits your environment.
+NLPM has three install surfaces — pick whichever fits your environment.
 
-The **slash-command plugin** ships through Claude Code. Inside Claude Code you get eleven `/nlpm:*` commands backed by six specialist agents and the reference skill catalog. The scoring rubric this plugin runs covers all three tools NLPM supports — **Claude Code, Codex CLI, and Antigravity** — via tier-aware overlays in `nlpm:conventions-claude` / `nlpm:conventions-codex` / `nlpm:conventions-antigravity`. See [the multi-tool design doc](https://github.com/xiaolai/nlpm/blob/main/analysis/multi-tool-design-2026-05.md).
+The **Claude Code plugin** exposes twelve `/nlpm:*` commands backed by
+specialist agents. The **Codex plugin** exposes the same twelve user goals as
+`$nlpm-*` workflow skills and includes the same reference catalog. Both use the
+same cross-tool scoring rubric for **Claude Code, Codex, and Antigravity**.
 
-The **standalone binary** (`bin/nlpm-check`) has no Claude Code dependency. Use it in Codex / Antigravity projects, in any project's pre-commit hook, or in CI.
+The **standalone binary** (`bin/nlpm-check`) has no agent dependency. Use it in
+any project's pre-commit hook or CI.
 
 ## Plugin install (Claude Code)
 
@@ -50,7 +54,27 @@ Then in your project:
 /nlpm:report          # render a self-contained HTML report
 ```
 
-## Standalone binary (Codex CLI, Antigravity, any CI, no Claude Code required)
+## Plugin install (Codex)
+
+```bash
+codex plugin marketplace add xiaolai/nlpm --ref main
+codex plugin add nlpm@xiaolai
+```
+
+To test a local checkout, pass the repository path instead of `xiaolai/nlpm`.
+The marketplace installs the self-contained package at `plugins/nlpm/`. Then:
+
+```text
+$nlpm-ls
+$nlpm-score
+$nlpm-check
+$nlpm-security-scan .
+```
+
+The bundled advisory hook is not trusted automatically. Review it with
+`/hooks` before enabling it.
+
+## Standalone binary (any CI, no agent required)
 
 `bin/nlpm-check` is a single-file Python 3.11+ script (stdlib only) that runs the deterministic subset of `/nlpm:check`. It validates the universal floor (the agentskills.io open spec, AGENTS.md conventions, manifest-vs-disk consistency, vague-quantifier checks) regardless of which tool authored the artifacts. Drop into pre-commit hooks or CI.
 
@@ -77,10 +101,13 @@ Pre-commit hook and GitHub Actions workflow templates live at:
 After installing NLPM in your project, decide whether to enforce a canonical noun/verb registry. If yes:
 
 ```bash
-/nlpm:vocab-init      # detects layout, runs the extractor, seeds tables
+/nlpm:vocab-init or $nlpm-vocab-init
 ```
 
-This writes `skills/<plugin>/vocabulary/SKILL.md` + `registry.yaml`. Prune the seeded tables, define `deprecated:` synonym lists, then opt into R51 by adding to `.claude/nlpm.local.md`:
+This writes `skills/<plugin>/vocabulary/SKILL.md` + `registry.yaml`. Prune the
+seeded tables, define `deprecated:` synonym lists, then opt into R51 in
+`.nlpm/config.md` for Codex or `.claude/nlpm.local.md` for Claude Code (Codex
+can read the latter as a compatibility fallback):
 
 ```yaml
 rule_overrides:

@@ -1,7 +1,6 @@
 ---
 name: vocabulary
 description: Use when writing, reviewing, or naming any NLPM artifact (command, agent, skill, rule, workflow) — pick the canonical noun or verb from this registry rather than coining a synonym. Loaded by the scorer and checker agents to detect vocabulary drift across artifacts.
-version: 0.1.0
 ---
 
 # NLPM Domain Vocabulary
@@ -149,7 +148,7 @@ These are **not top-level verbs in their own right** (P3). They are role-names f
 | `finding` | `score`, `check`, `scan` | one problem detected; carries a fingerprint in auditor scope |
 | `violation` | `check` | a finding specifically from cross-reference checking |
 | `penalty` | `score` | the points subtracted by a single finding |
-| `snapshot` | `score`, `trend` | a point-in-time record appended to `.claude/nlpm-history.json` |
+| `snapshot` | `score`, `trend` | a point-in-time record appended to `.nlpm/history.json` by Codex workflows (legacy Claude history can be imported) |
 | `inventory` | `ls` | the list of artifacts discovered in a path |
 | `report` | `audit`, `report`, `trend` | a roll-up document |
 | `spec` | `test` | a `.nlpm-test/*.spec.md` file defining expected behavior |

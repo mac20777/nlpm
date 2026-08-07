@@ -12,20 +12,30 @@ NLPM is the only multi-tool NL artifact validator that systematically checks **m
 
 NLPM treats natural language artifacts as **programs that can be linted**. Just as ESLint scores JavaScript and ruff scores Python, NLPM scores the markdown files that drive AI behavior: skills, agents, commands, rules, hooks, prompts, CLAUDE.md, and memory files.
 
-Eight commands, each doing one thing:
+Twelve workflows, each doing one thing. Claude Code exposes them as
+`/nlpm:*` commands; Codex exposes the same goals as `$nlpm-*` skills:
 
-| Command | What it does |
-|---------|-------------|
-| `/nlpm:ls` | Discover and inventory all NL artifacts in a repo |
-| `/nlpm:score` | Score artifact quality (100-point scale) |
-| `/nlpm:check` | Cross-component consistency checks |
-| `/nlpm:fix` | Auto-fix fixable issues |
-| `/nlpm:trend` | Track quality score trends over time |
-| `/nlpm:test` | Run NL artifact tests against spec files (TDD) |
-| `/nlpm:init` | Initialize NLPM for a project |
-| `/nlpm:security-scan` | Scan plugins for security risks in executable artifacts |
+| Goal | Claude Code | Codex |
+|------|-------------|-------|
+| Discover artifacts | `/nlpm:ls` | `$nlpm-ls` |
+| Score quality | `/nlpm:score` | `$nlpm-score` |
+| Check consistency | `/nlpm:check` | `$nlpm-check` |
+| Apply safe fixes | `/nlpm:fix` | `$nlpm-fix` |
+| Track trends | `/nlpm:trend` | `$nlpm-trend` |
+| Run NL-TDD specs | `/nlpm:test` | `$nlpm-test` |
+| Initialize a project | `/nlpm:init` | `$nlpm-init` |
+| Security-scan plugins | `/nlpm:security-scan` | `$nlpm-security-scan` |
+| Render an HTML report | `/nlpm:report` | `$nlpm-report` |
+| Seed a vocabulary | `/nlpm:vocab-init` | `$nlpm-vocab-init` |
+| Find vocabulary drift | `/nlpm:vocab-drift` | `$nlpm-vocab-drift` |
+| Refresh tool specs | `/nlpm:spec-sync` | `$nlpm-spec-sync` |
 
-Slash commands ship as a Claude Code plugin. The scoring rubric covers three ecosystems (Claude Code, Codex CLI, Antigravity) via tier-aware overlays — see [`analysis/multi-tool-design-2026-05.md`](analysis/multi-tool-design-2026-05.md). The standalone Python 3.11+ validator (`bin/nlpm-check`) has no Claude Code dependency and runs in pre-commit hooks or CI on any tool's artifacts.
+The Claude Code package uses slash commands and specialist agents. The Codex
+package uses focused workflow skills and can delegate bounded read-only batches
+to Codex subagents when available. Both use the same tier-aware rubric for
+Claude Code, Codex, and Antigravity artifacts. The standalone Python 3.11+
+validator (`bin/nlpm-check`) has no agent dependency and runs in pre-commit
+hooks or CI for Claude-only, Codex-only, and dual-format plugins.
 
 ### Beyond linting: the learning loop
 
@@ -61,6 +71,24 @@ claude plugin install nlpm@xiaolai --scope user
 
 > **Install fails with "Plugin not found in marketplace 'xiaolai'"?** Your local marketplace clone is stale. Run `claude plugin marketplace update xiaolai` and retry — `plugin install` does not auto-refresh. (The community marketplace doesn't have this caveat.)
 
+### Codex
+
+The repository contains a native Codex marketplace entry and a complete,
+self-contained plugin under `plugins/nlpm/`. Its source workflow skills live
+under `codex/skills/`; the installed package also bundles the deterministic
+checker, report renderer, vocabulary extractor, templates, and advisory hook:
+
+```bash
+codex plugin marketplace add xiaolai/nlpm --ref main
+codex plugin add nlpm@xiaolai
+```
+
+For a local checkout, pass the repository path to
+`codex plugin marketplace add` instead.
+Then invoke workflows such as `$nlpm-ls`, `$nlpm-score`, and `$nlpm-check`.
+Codex requires explicit review and trust before a bundled hook runs; inspect it
+with `/hooks`.
+
 ## Quick Start
 
 In Claude Code:
@@ -74,6 +102,19 @@ In Claude Code:
 /nlpm:fix                   # auto-fix what's fixable
 /nlpm:trend                 # track score history over time
 /nlpm:test                  # run NL-TDD specs
+```
+
+In Codex:
+
+```text
+$nlpm-ls                    # inventory all NL artifacts
+$nlpm-score                 # score the repository
+$nlpm-score --changed       # score only Git changes
+$nlpm-check                 # deterministic + cross-artifact checks
+$nlpm-fix                   # apply safe mechanical fixes
+$nlpm-trend                 # compare quality snapshots
+$nlpm-test                  # run NL-TDD specs
+$nlpm-security-scan .       # read-only executable-surface review
 ```
 
 From CI or a pre-commit hook (no Claude Code required):
@@ -117,7 +158,9 @@ Scores start at 100 and go down. Every issue has a fixed penalty. The score is d
 | 60-69 | Weak | Below threshold |
 | <60 | Rewrite | Fundamental problems |
 
-Default pass threshold: 70. Configure in `.claude/nlpm.local.md`.
+Default pass threshold: 70. Codex workflows configure it in `.nlpm/config.md`
+and can read `.claude/nlpm.local.md` as a compatibility fallback. The existing
+Claude Code commands continue to use `.claude/nlpm.local.md`.
 
 See `skills/nlpm/scoring/SKILL.md` for the full penalty tables. See `skills/nlpm/rules/SKILL.md` for the 50 Rules of Natural Language Programming.
 
@@ -138,10 +181,10 @@ Write test specs BEFORE writing artifacts:
 
 ```
 1. Write spec:    .nlpm-test/my-agent.spec.md
-2. /nlpm:test     -> RED (artifact doesn't exist)
+2. /nlpm:test or $nlpm-test -> RED (artifact doesn't exist)
 3. Write artifact: agents/my-agent.md
-4. /nlpm:test     -> check trigger accuracy, output format, score
-5. /nlpm:score    -> verify quality score
+4. Run test again -> check trigger accuracy, output format, score
+5. Run score      -> verify quality score
 6. Iterate        -> fix until GREEN
 ```
 
@@ -149,7 +192,9 @@ See `skills/nlpm/testing/SKILL.md` for the full spec format.
 
 ## Configuration
 
-Create `.claude/nlpm.local.md` (or run `/nlpm:init`):
+For Codex, create `.nlpm/config.md` or run `$nlpm-init`. For Claude Code, create
+`.claude/nlpm.local.md` or run `/nlpm:init`. Codex can read the Claude file as a
+compatibility fallback. Both formats use the same frontmatter:
 
 ```yaml
 ---
@@ -170,14 +215,18 @@ rule_overrides:
 
 ## Continuous Enforcement
 
-NLPM ships a `PostToolUse` hook that fires when you write or edit files. A shell script (`scripts/check-artifact.sh`) classifies the file -- if it's an NL artifact, Claude reminds you to run `/nlpm:score`. Non-NL files produce no output.
+NLPM ships a `PostToolUse` hook that fires when you write or edit files. A shell
+script (`scripts/check-artifact.sh`) classifies Claude file-edit payloads and
+Codex `apply_patch` payloads. It suggests `/nlpm:score` in Claude Code or
+`$nlpm-score` in Codex when an NL artifact changed. Non-NL files produce no
+output.
 
 This is advisory -- it does not block writes. For blocking enforcement, use a `PreToolUse` hook (see tdd-guardian for an example).
 
 ## Architecture
 
 ```
-commands/           User-facing commands (8 + 3 shared partials)
+commands/           Claude Code user-facing commands + shared partials
   ls.md             Discover artifacts -> dispatches scanner
   score.md          Score quality -> dispatches scorer + vague-scanner in parallel
   check.md          Cross-component checks -> dispatches checker
@@ -186,6 +235,10 @@ commands/           User-facing commands (8 + 3 shared partials)
   test.md           Run NL-TDD specs -> dispatches tester
   init.md           Configure project
   security-scan.md  Scan plugins for security risks -> dispatches security-scanner
+  report.md         Render a self-contained HTML report
+  vocab-init.md     Seed an R51 vocabulary registry
+  vocab-drift.md    Find advisory terminology drift
+  spec-sync.md      Refresh per-tool convention overlays
   shared/
     discover.md         Artifact path patterns (not user-invocable)
     classify.md         Type classification rules (not user-invocable)
@@ -226,7 +279,11 @@ hooks/
   hooks.json        PostToolUse advisory (command type + check-artifact.sh)
 
 scripts/
-  check-artifact.sh NL artifact classifier for the PostToolUse hook
+  check-artifact.sh Claude + Codex NL artifact classifier for PostToolUse
+
+codex/
+  skills/           12 workflow skills + 17 reference skills for Codex
+  references/       Shared cross-tool discovery, state, and safety contract
 
 .nlpm-test/         Self-test specs (dogfooding NL-TDD)
 

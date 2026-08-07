@@ -1,0 +1,42 @@
+{
+  "name": "nlpm",
+  "version": "1.2.4",
+  "description": "Natural-Language Programming Manager for Codex — discover, score, check, fix, test, trend, security-scan, and report on AI instruction artifacts, backed by the 50 Rules, a 100-point rubric, cross-tool conventions, vocabulary discipline, and a deterministic validator.",
+  "author": {
+    "name": "xiaolai"
+  },
+  "homepage": "https://nlpm.com",
+  "repository": "https://github.com/xiaolai/nlpm",
+  "license": "ISC",
+  "keywords": [
+    "nlp",
+    "lint",
+    "prompt",
+    "skill",
+    "agent",
+    "rules",
+    "quality",
+    "claude",
+    "codex",
+    "antigravity",
+    "multi-tool"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "nlpm",
+    "shortDescription": "Full NL artifact quality workflows and reference knowledge for Codex.",
+    "longDescription": "NLPM's complete Codex workflow suite: initialize a project, inventory NL artifacts, score them on a 100-point rubric, check cross-artifact consistency, apply safe fixes, track trends, run NL-TDD specs, scan executable plugin surfaces, render local HTML reports, manage vocabulary discipline, and refresh tool-spec overlays.",
+    "developerName": "xiaolai",
+    "category": "Coding",
+    "capabilities": [
+      "Read",
+      "Write"
+    ],
+    "defaultPrompt": [
+      "Use NLPM to inventory and score this repository's AI instruction artifacts.",
+      "Run an NLPM consistency check on this plugin.",
+      "Security-scan this plugin before I install it."
+    ],
+    "websiteURL": "https://github.com/xiaolai/nlpm"
+  }
+}
