@@ -1448,7 +1448,7 @@
             "R02",
             "R02"
           ],
-          "stale_90d_emitted": false
+          "stale_90d_emitted": true
         },
         {
           "number": 9,
@@ -1495,7 +1495,7 @@
             "R02",
             "R02"
           ],
-          "stale_90d_emitted": false
+          "stale_90d_emitted": true
         },
         {
           "number": 10,
@@ -1512,7 +1512,7 @@
           "rule_ids": [
             "R27"
           ],
-          "stale_90d_emitted": false
+          "stale_90d_emitted": true
         }
       ],
       "rule_adopted": false,
@@ -2539,7 +2539,7 @@
           "rule_ids": [
             "SEC-unpinned-npm-install"
           ],
-          "stale_90d_emitted": false
+          "stale_90d_emitted": true
         },
         {
           "number": 2,
@@ -2558,7 +2558,7 @@
             "BUG-missing-frontmatter",
             "R01"
           ],
-          "stale_90d_emitted": false
+          "stale_90d_emitted": true
         }
       ],
       "rule_adopted": false,
@@ -5249,7 +5249,7 @@
           "mergedAt": null,
           "closedAt": null,
           "title": "fix(huggingface-vision-trainer): correct stale skill references",
-          "updatedAt": "2026-07-05T02:48:32Z",
+          "updatedAt": "2026-08-07T13:44:55Z",
           "createdAt": "2026-07-05T02:48:32Z",
           "outcome": "open",
           "fingerprints": [
@@ -5268,7 +5268,7 @@
           "mergedAt": null,
           "closedAt": null,
           "title": "fix(huggingface-community-evals): correct stale skill references",
-          "updatedAt": "2026-07-05T02:49:28Z",
+          "updatedAt": "2026-08-07T13:44:55Z",
           "createdAt": "2026-07-05T02:49:28Z",
           "outcome": "open",
           "fingerprints": [
